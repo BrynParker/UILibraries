@@ -1,9 +1,4 @@
-<h1 align="center">
-  <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="[https://i.imgur.com/WxPy6t7.png](https://i.imgur.com/IgHJL1l.png)" alt="XGUI Library Package" width="200"></a>
-  <br>
-  <br>
-</h1>
+
 
 <h4 align="center">A collection of VGUI and Hook libraries used in conjunction with ChatGPT for easier generation of interfaces.</h4>
 
