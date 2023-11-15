@@ -1,4 +1,10 @@
-
+<h1 align="center">
+  <br>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.imgur.com/WxPy6t7.png" alt="EXG MafiaRP Release" width="200"></a>
+  <br>
+  EXG MafiaRP Release 1.0.1
+  <br>
+</h1>
 
 <h4 align="center">A collection of VGUI and Hook libraries used in conjunction with ChatGPT for easier generation of interfaces.</h4>
 
