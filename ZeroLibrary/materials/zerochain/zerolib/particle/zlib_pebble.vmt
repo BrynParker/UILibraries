@@ -1,0 +1,8 @@
+"unlitgeneric"
+{
+	"$basetexture" "zerochain/zerolib/particle/zlib_pebble"
+	$vertexcolor 1
+	$vertexalpha 1
+	$alphatest 1
+	
+}
