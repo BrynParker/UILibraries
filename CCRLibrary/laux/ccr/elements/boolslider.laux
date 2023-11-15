@@ -1,0 +1,107 @@
+
+CCR:GenerateFont("CCR.BoolSlider.Label", nil, 20)
+
+local PANEL = {}
+
+CCR:AccessorFunc(PANEL, "cvar", "ConVar")
+CCR:AccessorFunc(PANEL, "state", "State", "Boolean")
+
+CCR:AccessorFunc(PANEL, "text", "Text", "String")
+CCR:AccessorFunc(PANEL, "font", "Font", "String")
+CCR:AccessorFunc(PANEL, "color_text", "TextColor", "Color")
+
+function PANEL:Init()
+	self.text = "Undefined"
+	self.font = "CCR.BoolSlider.Label"
+	self.color_text = color_white
+end
+
+function PANEL:PostInit()
+	local clrCircleOn = CCR:ThemeColors().Green
+	local clrCircleOff = grey(128)
+	local clrBackgroundOn = CCR:ThemeColors().Secondary
+	local clrBackgroundOff = CCR:ThemeColors().Primary
+
+	self.lerpVar ||= 0
+
+	self.label = CCR:NewElement("DLabel", self)
+	self.label:SetText(self.text)
+	self.label:SetFont(self.font)
+	self.label:SetTextColor(self.color_text)
+	self.label:SetContentAlignment(5)
+	self.label.Think = (s) =>
+		s:SetAlpha(Lerp(self.lerpVar, 50, 255))
+	end
+
+	self.slider = CCR:NewElement("Panel", self)
+	self.slider:SetCursor("hand")
+	self.slider:SetSize(64, 24)
+	self.slider.Paint = (s, w, h) =>
+		local clr = CCR:LerpColor(self.lerpVar, clrBackgroundOff, clrBackgroundOn)
+		CCR:CustomRoundedBox(h / 2, 0, 0, w, h, clr, true, true, true, true)
+		
+		local size = h / 2 - 2
+		local xOff = size + 2
+		local xOn = w - xOff
+
+		local x = Lerp(self.lerpVar, xOff, xOn)
+		clr = CCR:LerpColor(self.lerpVar, clrCircleOff, clrCircleOn)
+		CCR:DrawCircle(x, h / 2, size, clr)
+	end
+	self.slider.OnMousePressed = (s, key) =>
+		stopif (key != MOUSE_LEFT)
+		self:SetState(!self:GetState(), true)
+	end
+
+	stopif (!self:GetConVar())
+
+	local cvar = GetConVar(self:GetConVar())
+	local bInt = cvar:GetBool() && 1 || 0
+	self.lerpVar = bInt
+	self.state = tobool(bInt)
+end
+
+function PANEL:SetState(b, call)
+	self:Lerp("lerpVar", b && 1 || 0)
+	self.state = b
+
+	if (call) then
+		self:OnStateChanged(b)
+	end
+
+	stopif (!self:GetConVar())
+
+	local cvar = GetConVar(self:GetConVar())
+	cvar:SetBool(b)
+end
+
+function PANEL:SetStateInstant(b, call)
+	self.state = b
+	self.lerpVar = b && 1 || 0
+
+	if (call) then
+		self:SetState(b, true)
+	end
+end
+
+function PANEL:OnStateChanged(b) end
+
+function PANEL:GetConVarObject()
+	return GetConVar(self:GetConVar())
+end
+
+function PANEL:PerformLayout(w, h)
+	stopif (!IsValid(self.slider))
+
+	self.label:SizeToContents()
+	self.label:SetPos(0, 0)
+	self.label:CenterVertical()
+
+	self.slider:SetPos(w - self.slider:GetWide())
+	self.slider:CenterVertical()
+end
+
+function PANEL:Paint(w, h)
+end
+
+CCR:RegisterElement("BoolSlider", PANEL, "Panel")
