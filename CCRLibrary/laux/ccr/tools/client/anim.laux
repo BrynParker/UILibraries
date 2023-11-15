@@ -1,0 +1,112 @@
+
+CCR:AddPanelFunction("Lerp", function(s, key, to, dur, cb)
+	local anim = s:NewAnimation(dur or .1)
+	anim.from = s[key]
+	anim.to = to
+	anim.Think = function(_s, pnl, frac)
+		pnl[key] = Lerp(Lerp(frac, 0, 1), _s.from, _s.to)
+	end
+	anim.OnEnd = function(_s)
+		if (cb) then
+			cb(s)
+		end
+	end
+
+	return anim
+end)
+
+CCR:AddPanelFunction("LerpColor", function(s, key, to, dur, callback)
+	local anim = s:NewAnimation(dur or .1)
+	anim.from = s[key]
+	anim.to = to
+	anim.Think = function(_s, pnl, frac)
+		pnl[key] = CCR:LerpColor(Lerp(frac, 0, 1), _s.from, _s.to)
+	end
+	anim.OnEnd = function(_s)
+		if (callback) then
+			callback(s)
+		end
+	end
+
+	return anim
+end)
+
+CCR:AddPanelFunction("LerpSize", function(s, w, h, dur, callback)
+	local anim = s:NewAnimation(dur or .1)
+	anim.from_w = s:GetWide()
+	anim.from_h = s:GetTall()
+	anim.to_w = w
+	anim.to_h = h
+	anim.Think = function(_s, pnl, frac)
+		local new_frac = Lerp(frac, 0, 1)
+		local _w = Lerp(new_frac, _s.from_w, _s.to_w)
+		local _h = Lerp(new_frac, _s.from_h, _s.to_h)
+
+		pnl:SetSize(_w, _h)
+	end
+	anim.OnEnd = function(_s)
+		if (callback) then
+			callback(s)
+		end
+	end
+
+	return anim
+end)
+
+CCR:AddPanelFunction("LerpPos", function(s, x, y, dur, callback)
+	local anim = s:NewAnimation(dur or .1)
+	anim.from_x, anim.from_y = s:GetPos()
+	anim.to_x = x
+	anim.to_y = y
+	anim.Think = function(_s, pnl, frac)
+		local new_frac = Lerp(frac, 0, 1)
+		local _x = Lerp(new_frac, _s.from_x, _s.to_x)
+		local _y = Lerp(new_frac, _s.from_y, _s.to_y)
+
+		pnl:SetPos(_x, _y)
+	end
+	anim.OnEnd = function(_s)
+		if (callback) then
+			callback(s)
+		end
+	end
+
+	return anim
+end)
+
+-- FIXME: Find a general fix, sometimes doesn't set to 0 properly, ffs
+-- NOTE: https://gitlab.com/sleeppyy/xeninui/-/blob/master/lua/xeninui/libs/essentials.lua#L250-266
+CCR:AddPanelFunction("LerpAlpha", function(s, alpha, time = .1, callback = function() end)
+	s.Alpha ||= 0
+
+	local oldThink = s.Think
+	s.Think = function(pnl)
+		if (oldThink) then oldThink(pnl) end
+
+		-- Shitty workaround
+		s:SetAlpha(pnl.Alpha >= 250 and 255 or pnl.Alpha)
+	end
+	s:Lerp("Alpha", alpha, time, function()
+		s.Think = oldThink
+		callback(s)
+	end)
+end)
+
+-- FIXME: Move, only here because of a race condition
+CCR:AddPanelFunction("SetTooltip", (tooltip) ->
+	if (isstring(tooltip)) then
+		tooltip = CCR.Tooltip()
+			:setTarget(self)
+			:setText(tooltip)
+			:detour()
+		:build()
+	end
+
+	self.ccr_tooltip = tooltip
+
+	return tooltip
+end)
+
+CCR:AddPanelFunction("GetTooltip", () ->
+	return self.ccr_tooltip
+end)

@@ -1,0 +1,73 @@
+
+local greyCache = {}
+
+rgb = Color
+rgba = Color
+grey = function(n, a)
+	if (a) then
+		return rgb(n, n, n, a)
+	end
+
+	if (greyCache[n]) then
+		return greyCache[n]
+	end
+
+	greyCache[n] = rgb(n, n, n, 255)
+	return greyCache[n]
+end
+gray = grey
+
+-- COPYRIGHT https://gist.github.com/jasonbradley/4357406#file-gistfile1-lua
+function hex(hex)
+	hex = hex:gsub("#", "")
+	return rgb(tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)))
+end
+
+-- COPYRIGHT https://github.com/minism/leaf/blob/master/color.lua
+local COLOR = FindMetaTable("Color")
+
+function COLOR:Shift(delta)
+	local a = self.a
+	if !delta then a, delta = delta, a end
+	local h, s, l = self:ToHSL()
+	return HSLToColor((h + delta) % 255, s, l, a)
+end
+
+function COLOR:Lighten(delta)
+	local h, s, l = self:ToHSL()
+	return HSLToColor(h, s, math.Clamp(l + delta, 0, 255), self.a)
+end
+
+function COLOR:Darken(delta)
+	local a = self.a
+	if !delta then a, delta = delta, a end
+	return self:Lighten(-delta)
+end
+
+function COLOR:Saturate(delta)
+	local a = self.a
+	if !delta then a, delta = delta, a end
+	local h, s, l = self:ToHSL()
+	return HSLToColor(h, math.Clamp(s + delta, 0, 255), l, a)
+end
+
+function COLOR:Desaturate(delta)
+	local a = self.a
+	if !delta then a, delta = delta, a end
+	return self:Saturate(-delta)
+end
+
+function CCR:LerpColor(frac, from, to)
+	local clr = rgba(
+		Lerp(frac, from.r, to.r),
+		Lerp(frac, from.g, to.g),
+		Lerp(frac, from.b, to.b),
+		Lerp(frac, from.a, to.a)
+	)
+
+	return clr
+end
+
+function CCR:GetColorDistance(a, b)
+	return math.sqrt((b.r - a.r) ^ 2 + (b.g - a.g) ^ 2 + (b.b - a.b) ^ 2)
+end

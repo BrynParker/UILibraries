@@ -1,0 +1,62 @@
+
+-- TODO: Common Code Blocks https://www.w3schools.com/js/tryit.asp?filename=tryjs_switch3
+
+public class CCR.Switch
+	constructor(compare)
+		self.compare = compare
+		self.expressions = {}
+		self.defaultFunc = nil
+
+		return self
+	end
+
+	case(expressions, fn)
+		if (istable(expressions)) then
+			for i, expr in ipairs(expressions) do
+				table.insert(self.expressions, {
+					expr = expr,
+					func = fn
+				})
+			end
+
+			return self
+		end
+
+		table.insert(self.expressions, {
+			expr = expressions,
+			func = fn
+		})
+
+		return self
+	end
+
+	default(fn)
+		self.defaultFunc = fn
+		return self
+	end
+
+	run()
+		local def = true
+		for i, tbl in ipairs(self.expressions) do
+			continueif (tbl.expr != self.compare)
+			def = false
+			stopif (tbl.func() == false)
+		end
+
+		if (def && self.defaultFunc) then
+			self.defaultFunc()
+		end
+	end
+end
+
+-- local switch = CCR.Switch(true)
+-- 	:case({false, true}, () =>
+-- 		return true
+-- 	end)
+-- 	:case(true, () =>
+-- 		print("ran true")
+-- 	end)
+-- 	:case(1, () =>
+-- 		print("ran 1")
+-- 	end)
+-- :run()

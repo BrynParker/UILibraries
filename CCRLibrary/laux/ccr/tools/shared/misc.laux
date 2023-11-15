@@ -1,0 +1,167 @@
+
+function CCR:RandomString(length)
+	local res = ""
+	for i = 1, length do
+		res = res .. string.char(math.random(97, 122))
+	end
+	return res
+end
+
+if CLIENT then
+	hook.Add("EntityRemoved", "CCR.PlayerDisconnect", function(ent)
+		if (ent:IsPlayer() && ent.CCR_FullyLoaded) then
+			hook.Run("CCR.PlayerDisconnected", ent)
+		end
+	end)
+else
+	hook.Add("PlayerDisconnected", "CCR.PlayerDisconnect", function(p)
+		hook.Run("CCR.PlayerDisconnected", p)
+	end)
+end
+
+function CCR:Debounce(id, sec, func)
+	id = "CCR.Debounce." .. id
+	if (timer.Exists(id)) then
+		--timer.Remove(id)
+	end
+
+	timer.Create(id, sec, 1, function()
+		func()
+		timer.Remove(id)
+	end)
+end
+
+local function uniqueRandomIntegersRecursive(amt, from, to, target)
+	assert(istable(target), "Target is not a table")
+
+	local rand = math.random(from, to)
+	if (!target[rand]) then
+		target[rand] = true
+		target["__count"] = (target["__count"] || 0) + 1
+	end
+
+	if (target["__count"] < amt) then
+		uniqueRandomIntegersRecursive(amt, from, to, target)
+	end
+end
+
+function CCR:UniqueRandomIntegers(amt, from, to)
+	if (amt > (to - from)) then
+		error("Amount is bigger than possible numbers")
+	end
+
+	local new = {}
+	uniqueRandomIntegersRecursive(amt, from, to, new)
+
+	new["__count"] = nil
+
+	local toReturn = {}
+	for i, _ in pairs(new) do
+		table.insert(toReturn, i)
+	end
+
+	return toReturn
+end
+
+-- TODO: Clean this trash up
+CCR.InitCallQueue ||= {}
+CCR.GamemodeInitialized ||= false
+hook.Add("Initialize", "CCR.CallPostInitialize", () =>
+	timer.Simple(0, () =>
+		local remove = {}
+		for i, func in ipairs(CCR.InitCallQueue) do
+			func()
+			remove[i] = true
+		end
+
+		for i, _ in pairs(remove) do
+			table.remove(CCR.InitCallQueue, i)
+		end
+	end)
+
+	CCR.GamemodeInitialized = true
+end)
+
+function CCR:CallPostInitialize(func)
+	if (self.GamemodeInitialized) then
+		return func()
+	end
+
+	table.insert(self.InitCallQueue, func)
+end
+
+CCR.InitPostEntityQueue ||= {}
+CCR.CalledInitPostEntity ||= false
+function CCR:CallPostInitPostEntity(func)
+	if (self.CalledInitPostEntity) then
+		return func()
+	end
+
+	table.insert(self.InitPostEntityQueue, func)
+end
+
+hook.Add("InitPostEntity", "CCR.CallInitPostEntity", () =>
+	for i, func in ipairs(CCR.InitPostEntityQueue) do
+		func()
+	end
+
+	CCR.InitPostEntityQueue = {}
+	CCR.CalledInitPostEntity = true
+end)
+
+-- time parser
+local units = {
+	["years"] = 525600,
+	["months"] = 43800,
+	["weeks"] = 10080,
+	["days"] = 1440,
+	["hours"] = 60,
+	["minutes"] = 1,
+	["permanent"] = 0
+}
+
+local function findUnit(str)
+	local found
+	for unit, _ in pairs(units) do
+		if (unit == str || unit:StartWith(str)) then
+			if (found) then
+				return false
+			end
+			
+			found = unit
+		end
+	end
+
+	return found
+end
+
+function CCR.ParseStringToSeconds(str)
+	if (tonumber(str)) then
+		return tonumber(str)
+	end
+
+	-- remove unneeded shit
+	str = str:lower()
+	str = str:Replace(" ", "")
+
+	local mins = 0
+
+	for t, unit in str:gmatch("(%d+)(%a+)") do
+		unit = findUnit(unit)
+
+		if (unit == false) then
+			return false -- unit not found
+		end
+
+		local mul = units[unit]
+		if (mul == 0) then
+			return 0 -- permanent
+		end
+
+		mins += mul * t
+	end
+
+	return math.Clamp(mins, 0, 31536000)
+end
+
+-- print("result:", CCR.TimeStringToSeconds("1d 12h"))

@@ -1,0 +1,147 @@
+
+-- TODO: Move to /classes?
+
+local _IsValid = (var) =>
+	if (var == nil) then
+		return false
+	end
+
+	local meta = getmetatable(var)
+	if (istable(meta) && meta.IsValid) then
+		return IsValid(var)
+	end
+
+	return true
+end
+
+CCR.Timers ||= {}
+
+class Timer
+	constructor()
+		CCR:AccessorFunc(self, "index", "Index", "Number")
+		CCR:AccessorFunc(self, "identifier", "Identifier")
+		CCR:AccessorFunc(self, "delay", "Delay", "Number")
+		CCR:AccessorFunc(self, "repetitions", "Repetitions", "Number")
+		CCR:AccessorFunc(self, "func", "Function", "Function")
+
+		CCR:AccessorFunc(self, "last_executed", "LastExecuted", "Number")
+		CCR:AccessorFunc(self, "total_repetitions", "TotalRepetitions", "Number")
+
+		self.delay = 0
+		self.repetitions = 1
+		self.func = () => end
+		self.last_executed = CurTime()
+		self.total_repetitions = 0
+		
+		return self
+	end
+
+	__type()
+		return "CCR.Timer"
+	end
+
+	__tostring()
+		return `CCR.Timer[${self.identifier}]`
+	end
+
+	IsValid()
+		return
+			_IsValid(self.identifier) &&
+			CCR.Timers[self.index] == self
+	end
+
+	Perform()
+		if (self.last_executed + self.delay <= CurTime()) then
+			self:Trigger()
+		end
+
+		return self
+	end
+
+	Trigger(reset = true)
+		if (!self:IsValid()) then
+			return
+		end
+
+		if (reset) then
+			self.last_executed = CurTime()
+		end
+
+		self.total_repetitions++
+
+		if (self.repetitions > 0 && self.total_repetitions >= self.repetitions) then
+			self:Remove()
+		end
+
+		local pass
+		if (self.identifier != nil) then
+			local meta = getmetatable(self.identifier)
+			if (istable(meta) && meta.IsValid) then
+				pass = IsValid(self.identifier) && self.identifier
+			end
+		end
+
+		self.func(pass) -- NOTE: Call func() AFTER remove otherwise Remove() removes the same timer (id) if it gets re-created in the callback
+
+		return self
+	end
+
+	Remove()
+		table.remove(CCR.Timers, self:GetIndex())
+
+		for i, timer in ipairs(CCR.Timers) do
+			timer:SetIndex(i)
+		end
+	end
+
+	Register()
+		local index = table.insert(CCR.Timers, self)
+		self:SetIndex(index)
+
+		return self
+	end
+end
+
+function CCR.NewTimer(...)
+	return Timer(...)
+end
+
+function CCR:CreateTimer(identifier, delay, repetitions, func = () => end, override = true)
+	assert(identifier)
+	assert(tonumber(delay))
+	assert(tonumber(repetitions))
+	assert(isfunction(func))
+
+	if (override) then
+		for i, timer in ipairs(CCR.Timers) do
+			if (timer:GetIdentifier() == identifier) then
+				timer:Remove()
+			end
+		end
+	end
+
+	local obj = CCR.NewTimer()
+	obj:SetIdentifier(identifier)
+	obj:SetDelay(delay)
+	obj:SetRepetitions(repetitions)
+	obj:SetFunction(func)
+	obj:Register()
+
+	return obj
+end
+
+function CCR:RunNextFrame(identifier, func = () => end, override)
+	return self:CreateTimer(identifier, 0, 1, func, override)
+end
+
+hook.Add("Tick", "CCR.Timers", () =>
+	for i, timer in ipairs(CCR.Timers) do
+		local success, err = pcall(() => timer:Perform() end)
+		if (!success) then
+			CCR.Logger:Error(`Timer "${timer:GetIdentifier()}" failed, error: ${err}`)
+			CCR.Logger:Error("^ Removed timer to prevent error spam.")
+
+			timer:Remove()
+		end
+	end
+end)
