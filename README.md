@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.imgur.com/IgHJL1l.png" alt="EXG MafiaRP Release" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.imgur.com/j54AuKq.png" alt="EXG MafiaRP Release" width="200"></a>
   <br>
   VGUI Library Package
   <br>
