@@ -1,0 +1,230 @@
+
+-- TODO: laux class
+-- Just a simple class which is meant to hold values and verify their type on input
+
+local CLASS = {}
+CLASS.__index = CLASS
+
+CCR:AccessorFunc(CLASS, "id", "ID", "String")
+
+function CLASS.new(id)
+	local _self = setmetatable({}, CLASS)
+	_self.id = id
+	return _self
+end
+
+function CLASS:__tostring()
+	return "CCR.Config[" .. (self:GetID() or "Undefined") .. "]"
+end
+
+function CCR:NewConfig(id)
+	return CLASS.new(id)
+end
+
+-- v2
+
+CCR.Config ||= {}
+
+-- the actual field, holds the value and verifies it on input
+class Field
+	_get key
+
+	_get parent
+	parent = nil
+
+	_get _set default
+	default = nil
+
+	_get _set validator
+	validator = nil
+
+	_get _set tranformFunction
+	tranformFunction = nil
+
+	constructor(parent, key)
+		self.parent = parent
+		self.key = key
+	end
+
+	__type()
+		return "CCR.Config.Field"
+	end
+
+	finish()
+		return self.parent:registerField(self)
+	end
+end
+
+-- holds all fields, allows me to put getters and setters
+class FieldController
+	_get parent
+	parent = nil
+
+	_get fields
+	fields = {}
+	
+	constructor(parent: CCR.Config)
+		self.parent = parent
+	end
+
+	registerField(field: CCR.Config.Field)
+		assert(self[field.key] == nil, `Field key '${field.key}' does already exist in FieldController`)
+
+		self.fields[field.key] = field
+
+		local varName = string.gsub(" " .. field.key, "%W%l", string.upper):sub(2)
+
+		-- setter
+		local setterName = `set${varName}`
+		assert(self[setterName] == nil, `Setter for field '${field.key}' does already exist`)
+
+		self[setterName] = (value) =>
+			if (field.validator) then
+				local success, err = pcall(field.validator.validate, value)
+				if (!success) then
+					ErrorNoHaltTrace(err)
+					
+					-- not needed?
+					-- local _, pathPos = string.find(err, ".lua:[%d]+:")
+					-- print(pathPos)
+
+					return
+				end
+			end
+
+			if (field.tranformFunction) then
+				value = field.tranformFunction(value)
+			end
+
+			self[field.key] = value
+
+			return self
+		end
+
+		-- set default
+		local def = field:getDefault()
+		if (def != nil) then
+			self[setterName](def)
+		end
+
+		-- getter
+		local getterName = `get${varName}`
+		assert(self[getterName] == nil, `Getter for field '${field.key}' does already exist`)
+
+		self[getterName] = () =>
+			local val = self[field.key]
+			if (val != nil) then
+				return val
+			else
+				return field:getDefault()
+			end
+		end
+	end
+
+	__type()
+		return "CCR.Config.FieldController"
+	end
+end
+
+-- default validators
+public class CCR.Config.FieldValidator
+	static id = "undefined"
+	static validate(value) error("implement me") end -- throw exception if :oof:
+end
+local validators = CCR:IncludeFile("!validators", "sh")
+
+public class CCR.Config
+	static VALIDATOR_TABLE			= validators["table"]
+	static VALIDATOR_ARRAY			= validators["array"]
+	static VALIDATOR_BOOLEAN		= validators["boolean"]
+	static VALIDATOR_NUMBER			= validators["number"]
+	static VALIDATOR_INTEGER		= validators["integer"]
+	static VALIDATOR_STRING			= validators["string"]
+	static VALIDATOR_ENTITY			= validators["entity"]
+	static VALIDATOR_VECTOR			= validators["vector"]
+	static VALIDATOR_ANGLE			= validators["angle"]
+	static VALIDATOR_MATERIAL		= validators["material"]
+	static VALIDATOR_COLOR			= validators["color"]
+	static VALIDATOR_PANEL			= validators["panel"]
+	static VALIDATOR_FUNCTION		= validators["function"]
+	static VALIDATOR_DBCONFIG		= validators["db_config"]
+
+	_get fieldController
+	fieldController = nil
+
+	constructor()
+		self.fieldController = FieldController(self)
+	end
+
+	__tostring()
+		return self:__type()
+	end
+
+	newField(key: string)
+		return Field(self, key)
+	end
+
+	registerField(field: CCR.Config.Field)
+		self.fieldController:registerField(field)
+		return self
+	end
+
+	fields() -- prettier
+		return self:getFieldController()
+	end
+
+	register()
+		return self
+	end
+end
+
+-- test
+
+stopif (true)
+
+local cfg = CCR.Config()
+	:newField("test")
+		:setValidator(CCR.Config.VALIDATOR_STRING)
+		:setDefault("0")
+	:finish()
+
+	:newField("db")
+		:setValidator(CCR.Config.VALIDATOR_DBCONFIG)
+		:setDefault({})
+	:finish()
+
+	:newField("shit")
+		:setValidator(CCR.Config.VALIDATOR_BOOLEAN)
+		:setDefault(true)
+	:finish()
+
+	:newField("shitArray")
+		:setValidator(CCR.Config.VALIDATOR_ARRAY)
+		:setDefault({
+			"a",
+			["b"] = 1
+		})
+	:finish()
+
+	:newField("tableKeyBool")
+		:setValidator(CCR.Config.VALIDATOR_TABLE)
+		:setDefault({
+			"sm", "oll", "pp"
+		})
+		:setTranformFunction((value) =>
+			local new = {}
+			for i, str in ipairs(value) do
+				new[str] = true
+			end
+
+			return new
+		end)
+	:finish()
+:register()
+
+-- PrintTable(cfg:fields():getTableKeyBool())
+--[[
+oll = true
+pp = true
+sm = true
+]]

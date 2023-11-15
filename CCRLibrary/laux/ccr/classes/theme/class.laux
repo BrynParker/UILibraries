@@ -1,0 +1,28 @@
+
+public class CCR.Theme extends CCR.Base
+	constructor(id)
+		super()
+
+		CCR:AccessorFunc(self, "id", "ID")
+		CCR:AccessorFunc(self, "name", "Name")
+		CCR:AccessorFunc(self, "colors", "Colors")
+		CCR:AccessorFunc(self, "materials", "Materials")
+		CCR:AccessorFunc(self, "box_roundness", "BoxRoundness")
+	
+		self.id = id
+
+		return self
+	end
+
+	__tostring()
+		return `CCR.Theme[${self.id}]`
+	end
+
+	IsValid()
+		return self.id != nil && CCR.Themes[self.id] == self
+	end
+
+	Register()
+		CCR:RegisterTheme(self)
+	end
+end
