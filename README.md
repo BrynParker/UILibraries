@@ -1,8 +1,7 @@
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="[[https://i.imgur.com/WxPy6t7.png](https://cdn.hashnode.com/res/hashnode/image/upload/v1673891784142/8078a8cf-4f04-4a68-98d7-6bd53ef22035.png)](https://cdn.hashnode.com/res/hashnode/image/upload/v1673891784142/8078a8cf-4f04-4a68-98d7-6bd53ef22035.png)" alt="GMOD VGUI Library Database" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="[https://i.imgur.com/WxPy6t7.png](https://i.imgur.com/IgHJL1l.png)" alt="XGUI Library Package" width="200"></a>
   <br>
-  VGUI Library Package
   <br>
 </h1>
 
