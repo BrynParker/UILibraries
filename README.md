@@ -1,8 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.imgur.com/WxPy6t7.png" alt="EXG MafiaRP Release" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.imgur.com/IgHJL1l.png" alt="EXG MafiaRP Release" width="200"></a>
   <br>
-  EXG MafiaRP Release 1.0.1
+  VGUI Library Package
   <br>
 </h1>
 
