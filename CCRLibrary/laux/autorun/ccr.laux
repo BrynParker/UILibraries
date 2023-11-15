@@ -1,0 +1,15 @@
+
+CCR ||= {}
+
+if (SERVER) then
+	resource.AddSingleFile("resource/fonts/Muli-Italic-VariableFont_wght.ttf")
+	resource.AddSingleFile("resource/fonts/Muli-VariableFont_wght.ttf")
+
+	resource.AddWorkshop("2083478164")
+
+	AddCSLuaFile("ccr/tools/shared/!resources.lua")
+	AddCSLuaFile("ccr/sh_init.lua")
+end
+
+include("ccr/tools/shared/!resources.lua")
+include("ccr/sh_init.lua")
