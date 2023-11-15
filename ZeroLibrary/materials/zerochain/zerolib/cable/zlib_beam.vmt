@@ -1,0 +1,10 @@
+"UnlitGeneric"
+{
+	"$basetexture"		"zerochain\zerolib\cable\zlib_beam_square"
+	"$nocull"			1
+	"$MinLight"		1
+	"$MaxLight"		1
+	"$additive"		1
+	"$vertexalpha" 1
+	"$vertexcolor" 1	
+}
