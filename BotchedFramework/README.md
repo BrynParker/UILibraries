@@ -38,6 +38,5 @@ I do not take any credit for the libraries in this repo, I have simply compiled 
 ## Examples/Mockups
 
 <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://media.gmodstore.com/_/script_media/8dd40dcca22f63daf0f7bf02c82a0236.png" alt="Mission Board" width="200"></a>
-
-
+<a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://media.gmodstore.com/_/script_media/dc0d2e330205de30ff2a9fb0d51789dd.png" alt="Mission Board" width="200"></a>
 
