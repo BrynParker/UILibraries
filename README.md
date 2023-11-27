@@ -38,6 +38,8 @@ I do not take any credit for the libraries in this repo, I have simply compiled 
 - Stromic
 - Mouka
 - XenPare
+- Sleepyy
+- Legitdood
 
 
 ## License
