@@ -14,7 +14,7 @@
 <p align="center">
   <a href="#features">Additions</a> •
   <a href="#credits">Credits</a> •
-  <a href="#license">Examples</a>
+  <a href="#additions">Examples</a>
 </p>
 
 
