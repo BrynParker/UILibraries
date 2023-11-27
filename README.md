@@ -37,6 +37,7 @@ I do not take any credit for the libraries in this repo, I have simply compiled 
 - TomDotBat
 - Stromic
 - Mouka
+- XenPare
 
 
 ## License
