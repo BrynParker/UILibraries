@@ -22,17 +22,9 @@
 
 ## Additions
 
-• addon management,
-• client settings,
-• server settings,
-• creating your own color themes,
-• creating language files,
-• load manager
-• fonts manager
-• popup windows (text input etc)
-• various vgui elements
-• various useful functions.
-
+- UI Assets
+- Premade Panels
+- Drawing Functions
 
 
 
